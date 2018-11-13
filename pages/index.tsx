@@ -1,9 +1,17 @@
-import React from 'react'
-import Link from 'next/link'
+import React, { Component } from "react";
+import Link from "next/link";
+import Layout from "../layouts/layout";
 
-export default () => (
-  <ul>
-    <li><Link href='/a' as='/a'><a>a</a></Link></li>
-    <li><Link href='/b' as='/b'><a>b</a></Link></li>
-  </ul>
-)
+export default class Index extends Component {
+  render() {
+    return (
+    <Layout>
+      <div className="row">
+        <div className="col-md-12">
+          TEST
+        </div>
+      </div>
+    </Layout>
+    );
+  }
+}

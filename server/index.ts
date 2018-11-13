@@ -14,7 +14,7 @@ app.prepare()
   
   server.use(bodyParser.json());
   
-  registerRoutes(server);
+  registerRoutes(server, app);
 
   server.get('*', (req, res) => {
     return handle(req, res);

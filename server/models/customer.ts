@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn } from "typeorm";
+import Order from "./order";
 
 @Entity({name: 'customers'})
 export default class Customer {
@@ -7,4 +8,11 @@ export default class Customer {
   
   @Column({name: 'customer_name'})
   name: string;
+
+  @Column({name: 'customer_phone'})
+  phone: string;
+
+  @OneToMany(_ => Order, order => order.customer)
+  @JoinColumn({name: "order_customer"})
+  orders: Promise<Order[]>
 }

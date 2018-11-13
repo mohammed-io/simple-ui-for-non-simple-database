@@ -1,5 +1,7 @@
 import { createConnection, Connection } from "typeorm";
 import Customer from "../models/customer";
+import Order from "../models/order";
+import Merchant from "../models/merchant";
 
 let connection = null;
 
@@ -12,7 +14,7 @@ export const getConnection = async () => {
       username: "root",
       password: "11223344",
       database: "test",
-      entities: [Customer],
+      entities: [Customer, Order, Merchant],
     });
   }
   return connection as Connection;

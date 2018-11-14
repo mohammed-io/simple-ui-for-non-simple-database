@@ -12,7 +12,7 @@ import {
 
 import Link from "next/link";
 
-import "bootstrap/dist/css/bootstrap.css";
+import "bootswatch/dist/lux/bootstrap.css";
 
 export default class Layout extends Component {
   state = {

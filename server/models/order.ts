@@ -2,11 +2,13 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   Column,
 } from "typeorm";
 import Customer from "./customer";
 import Merchant from "./merchant";
+import OrderComment from "./order-comment";
 
 @Entity({ name: "orders" })
 export default class Order {
@@ -32,4 +34,9 @@ export default class Order {
   @ManyToOne(_ => Merchant, merchant => merchant.orders, {eager: true})
   @JoinColumn({name: 'order_merchant'})
   merchant: Merchant;
+
+  // Bottleneck here
+  @OneToMany(_ => OrderComment, comment => comment.order, {eager: false})
+  @JoinColumn({name: 'order_id'})
+  comments: OrderComment[];
 }

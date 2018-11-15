@@ -1,4 +1,4 @@
-import { Gmaps, Marker, InfoWindow, Circle } from "react-gmaps";
+import { Gmaps, Marker } from "react-gmaps";
 
 export default ({
   coordinates = { lat: 36.20956640321589, lng: 44.02851596560663 },
@@ -8,9 +8,9 @@ export default ({
   zoom = 12,
   loadingMessage = "Loading..",
   canChangeLocation = true,
-  onLocationChanged = (coords?: { lat: number; lng: number }) => {},
-  onMarkerDragEnd = (e?) => {},
-  onMapCreated = (e?) => {}
+  onLocationChanged = (coords?: { lat: number; lng: number }) => {coords},
+  onMarkerDragEnd = (e?) => {e},
+  onMapCreated = (e?) => {e}
 }) => (
   <Gmaps
     width={width}

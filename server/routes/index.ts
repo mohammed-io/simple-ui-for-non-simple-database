@@ -44,7 +44,7 @@ export const registerRoutes = (server: Express, _?: Server) => {
 
     const result = await repo.searchByName(term);
 
-    res.json(result)
+    res.json(result);
   });
 
   server.get("/v1/orders/:orderId/comments", async (req, res) => {
@@ -57,8 +57,6 @@ export const registerRoutes = (server: Express, _?: Server) => {
   });
 
   server.post("/v1/orders/:orderId/comments", async (req, res) => {
-    console.log(req.body);
-
     if (!req.body.text) return res.end();
 
     const repo = await OrderCommentRepository.getSingleton();
@@ -127,15 +125,17 @@ export const registerRoutes = (server: Express, _?: Server) => {
   server.get("/v1/orders", async (req, res) => {
     const ordersRepository = await OrderRepository.getSingleton();
 
-    const { page = 1, pageSize = 10 } = req.query;
+    const { page = 1, pageSize = 10, term = "" } = req.query;
 
-    const result = await ordersRepository.find({
-      take: pageSize,
-      skip: (page - 1) * pageSize
-    });
+    const [result, count] = await ordersRepository.findByIdOrNameWithCount(
+      term,
+      page,
+      pageSize
+    );
 
-    res.json(
-      result.map(order => {
+    res.json({
+      count,
+      data: result.map(order => {
         const names = JSON.parse(order.merchant.name);
         return {
           ...order,
@@ -147,7 +147,7 @@ export const registerRoutes = (server: Express, _?: Server) => {
           }
         };
       })
-    );
+    });
   });
 
   server.patch("/v1/orders/:orderId", async (req, res) => {

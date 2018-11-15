@@ -4,12 +4,15 @@ import Layout from "../layouts/layout";
 import moment from "moment";
 import swal from "sweetalert2";
 import dynamic from "next/dynamic";
+import Pagination from "../components/pagination";
+import {debounce} from 'lodash';
 
 import {
   DropdownMenu,
   DropdownItem,
   ButtonDropdown,
-  DropdownToggle
+  DropdownToggle,
+  Input,
 } from "reactstrap";
 import { OrderCommentsModal } from "../components/order-comments-modal";
 import ChangeOrderCustomerModal from "../components/change-order-customer-modal";
@@ -35,6 +38,7 @@ function evaluateOrNull(func: () => any) {
 export default class Index extends Component {
   state = {
     page: 0,
+    totalCount: 0,
     orders: [],
     isLoading: true,
     openStatusDropdown: {},
@@ -44,7 +48,8 @@ export default class Index extends Component {
     changeCustomerModalOpen: false,
     changeLocationModalOpen: false,
     searchedCustomers: [],
-    selectedOrderLocation: null
+    selectedOrderLocation: null,
+    searchTerm: ''
   };
 
   componentDidMount() {
@@ -60,12 +65,13 @@ export default class Index extends Component {
     });
   };
 
-  retrieveOrdersForPage = (page = 1) => {
-    if (page === this.state.page) return;
+  retrieveOrdersForPage = (page = 1, force = false) => {
+    if (page === this.state.page && !force) return;
 
     axios.get(this.getPaginatedLink(page)).then(res => {
       this.setState({
-        orders: res.data,
+        orders: res.data.data,
+        totalCount: res.data.count,
         page,
         isLoading: false
       });
@@ -103,8 +109,20 @@ export default class Index extends Component {
     });
   };
 
+  searchTimeoutHandle;
+  handleSearch = term => {
+    clearTimeout(this.searchTimeoutHandle);
+
+    this.searchTimeoutHandle = setTimeout(() => {
+      console.log('aaa')
+      this.setState({searchTerm: term}, () => {
+        this.retrieveOrdersForPage(this.state.page, true)
+      })
+    }, 500);
+  }
+
   getPaginatedLink = page => {
-    return `/v1/orders?page=${page}`;
+    return `/v1/orders?page=${page}&term=${this.state.searchTerm}`;
   };
 
   handleSendCOmment = text => {
@@ -258,6 +276,12 @@ export default class Index extends Component {
               onExit={this.clearComments}
               onCommentSent={this.handleSendCOmment}
             />
+            <div>
+              <Input className="form-control" placeholder="Search by Id or Status..." onChange={e => {
+                e.persist();
+                this.handleSearch(e.target.value)
+              }} />
+            </div>
             <div className="table-responsive">
               <table className="table table-striped table-hover">
                 <thead>
@@ -366,20 +390,12 @@ export default class Index extends Component {
               </table>
             </div>
             <div>
-              <button
-                className="btn btn-sm btn-primary"
-                disabled={this.state.isLoading}
-                onClick={this.prevPage}
-              >
-                {"<<"}
-              </button>
-              <button
-                className="btn btn-sm btn-primary"
-                disabled={this.state.isLoading}
-                onClick={this.nextPage}
-              >
-                {">>"}
-              </button>
+              <Pagination
+                pageNeighbours={1}
+                pageLimit={10}
+                totalRecords={this.state.totalCount}
+                onPageChanged={({currentPage}) => this.retrieveOrdersForPage(currentPage)}
+              />
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Modal, ModalBody, ModalFooter } from "reactstrap";
+import { Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import SelectLocationOnMap from "./select-location-on-map";
 
 interface ChangeLocationModalProps {
@@ -33,6 +33,7 @@ export default class ChangeLocationModal extends Component<
         size="lg"
         toggle={this.props.onExit}
       >
+        <ModalHeader>Change Location for Order</ModalHeader>
         <ModalBody>
           <div className="row">
             <div className="col-md-12">

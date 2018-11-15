@@ -155,12 +155,18 @@ export const registerRoutes = (server: Express, _?: Server) => {
 
     const { orderId } = req.params;
 
-    const toUpdate = await ordersRepository.findOne(orderId);
+    const toUpdate = await ordersRepository.find({
+      where: { id: orderId },
+      take: 1,
+      loadEagerRelations: false
+    });
 
-    Object.assign(toUpdate, req.body);
+    Object.assign(toUpdate[0], req.body);
 
     await ordersRepository.save(toUpdate);
 
-    res.json(toUpdate);
+    const result = await ordersRepository.findOne(orderId);
+
+    res.json(result);
   });
 };

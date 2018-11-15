@@ -5,14 +5,14 @@ import moment from "moment";
 import swal from "sweetalert2";
 import dynamic from "next/dynamic";
 import Pagination from "../components/pagination";
-import {debounce} from 'lodash';
+import { debounce } from "lodash";
 
 import {
   DropdownMenu,
   DropdownItem,
   ButtonDropdown,
   DropdownToggle,
-  Input,
+  Input
 } from "reactstrap";
 import { OrderCommentsModal } from "../components/order-comments-modal";
 import ChangeOrderCustomerModal from "../components/change-order-customer-modal";
@@ -49,7 +49,7 @@ export default class Index extends Component {
     changeLocationModalOpen: false,
     searchedCustomers: [],
     selectedOrderLocation: null,
-    searchTerm: ''
+    searchTerm: ""
   };
 
   componentDidMount() {
@@ -114,12 +114,11 @@ export default class Index extends Component {
     clearTimeout(this.searchTimeoutHandle);
 
     this.searchTimeoutHandle = setTimeout(() => {
-      console.log('aaa')
-      this.setState({searchTerm: term}, () => {
-        this.retrieveOrdersForPage(this.state.page, true)
-      })
+      this.setState({ searchTerm: term }, () => {
+        this.retrieveOrdersForPage(this.state.page, true);
+      });
     }, 500);
-  }
+  };
 
   getPaginatedLink = page => {
     return `/v1/orders?page=${page}&term=${this.state.searchTerm}`;
@@ -151,26 +150,24 @@ export default class Index extends Component {
 
   handleCustomerSearch = term => {
     return axios.get(`/v1/customers/search?term=${term}`).then(res => {
-      this.setState({
-        searchedCustomers: res.data
-      });
-
-      return Promise.resolve(null);
+      return Promise.resolve(res.data.map(x => ({label: x.name, id: x.id})));
     });
   };
 
   handleCustomerSelection = newCustomer => {
+    console.log(newCustomer)
     axios
       .patch(`/v1/orders/${this.state.selectedOrderId}`, {
         customerId: newCustomer.id
       })
       .then(res => {
+        console.log(res.data)
         this.setState({
           selectedOrderId: 0,
           changeCustomerModalOpen: false,
           orders: this.state.orders.map(order => {
             if (order.id === this.state.selectedOrderId) {
-              return { ...order, customer: res.data };
+              return { ...order, customer: res.data.customer };
             }
             return order;
           })
@@ -277,10 +274,14 @@ export default class Index extends Component {
               onCommentSent={this.handleSendCOmment}
             />
             <div>
-              <Input className="form-control" placeholder="Search by Id or Status..." onChange={e => {
-                e.persist();
-                this.handleSearch(e.target.value)
-              }} />
+              <Input
+                className="form-control"
+                placeholder="Search by Id or Status..."
+                onChange={e => {
+                  e.persist();
+                  this.handleSearch(e.target.value);
+                }}
+              />
             </div>
             <div className="table-responsive">
               <table className="table table-striped table-hover">
@@ -394,7 +395,9 @@ export default class Index extends Component {
                 pageNeighbours={1}
                 pageLimit={10}
                 totalRecords={this.state.totalCount}
-                onPageChanged={({currentPage}) => this.retrieveOrdersForPage(currentPage)}
+                onPageChanged={({ currentPage }) =>
+                  this.retrieveOrdersForPage(currentPage)
+                }
               />
             </div>
           </div>

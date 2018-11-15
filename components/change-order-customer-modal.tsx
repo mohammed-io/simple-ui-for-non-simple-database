@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "reactstrap";
 import { debounce } from "lodash";
-import Downshift from 'downshift';
+// import Downshift from 'downshift';
+import AsyncSelect from "react-select/lib/Async";
+import ReactSelect from "react-select";
 
 interface ChangeOrderCustomerModalProps {
   [x: string]: any;
@@ -29,41 +31,32 @@ export default class ChangeOrderCustomerModal extends Component<
       isLoading: true
     });
 
-    console.log(term);
-
-    this.props.onSearch(term).then(() =>
-      this.setState({
-        isLoading: false
-      })
-    );
-  }, 300);
+    return this.props.onSearch(term);
+  }, 400);
 
   selectCustomer = customer => {
-    this.setState({ selectedCustomer: customer })
-  }
+    this.setState({ selectedCustomer: customer });
+  };
 
   render() {
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.props.onExit}>
         <ModalHeader>Choose the new customer for the order</ModalHeader>
         <ModalBody>
-          <Downshift
-            itemToString={item => item.name || ''}
-            onChange={customer =>this.selectCustomer(customer)}>
-           {downshift => {
-             return (
-             <div>
-              <ul>
-                {
-                  this.props.options.map(x => <li>{x.name}</li>)
-                }
-              </ul>
-             </div>);
-           }}
-          </Downshift>
+          <AsyncSelect
+            loadOptions={this.handleSearch}
+            onChange={this.selectCustomer}
+          />
         </ModalBody>
         <ModalFooter>
-          <button className="btn btn-success">Select Customer</button>
+          <button
+            className="btn btn-success"
+            onClick={() =>
+              this.props.onCustomerSelected(this.state.selectedCustomer)
+            }
+          >
+            Select Customer
+          </button>
         </ModalFooter>
       </Modal>
     );

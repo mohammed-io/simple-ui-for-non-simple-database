@@ -26,6 +26,7 @@
     "react-bootstrap-typeahead": "^3.2.4",
     "react-dom": "^16.6.3",
     "react-gmaps": "^1.9.0",
+    "react-select": "^2.1.1",
     "reactstrap": "^6.5.0",
     "sweetalert2": "^7.29.0",
     "sweetalert2-react-content": "^1.0.1",

@@ -27,6 +27,8 @@
     "react-dom": "^16.6.3",
     "react-gmaps": "^1.9.0",
     "reactstrap": "^6.5.0",
+    "sweetalert2": "^7.29.0",
+    "sweetalert2-react-content": "^1.0.1",
     "typeorm": "^0.2.8",
     "typescript": "latest",
     "typescript-babel-jest": "^1.0.5"

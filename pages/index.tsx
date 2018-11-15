@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import Layout from "../layouts/layout";
 import moment from "moment";
+import swal from "sweetalert2";
 import dynamic from "next/dynamic";
 
 import {
@@ -14,11 +15,11 @@ import { OrderCommentsModal } from "../components/order-comments-modal";
 import ChangeOrderCustomerModal from "../components/change-order-customer-modal";
 import _changeLocationModal from "../components/change-location-modal";
 
-interface AsTypeOf<T> {
+interface AsClassOf<T> {
   (): T;
 }
 
-const ChangeLocationModal: AsTypeOf<_changeLocationModal> = dynamic(
+const ChangeLocationModal: AsClassOf<_changeLocationModal> = dynamic(
   () => import("../components/change-location-modal"),
   { ssr: false }
 );
@@ -160,7 +161,7 @@ export default class Index extends Component {
   };
 
   handleLocationChange = coords => {
-    console.log(coords)
+    console.log(coords);
     axios
       .patch(`/v1/orders/${this.state.selectedOrderId}`, {
         latitude: coords.lat,
@@ -187,7 +188,7 @@ export default class Index extends Component {
   showChangeLocationModalFor = order => {
     this.setState({
       selectedOrderId: order.id,
-      selectedOrderLocation: {lat: order.latitude, lng: order.longitude},
+      selectedOrderLocation: { lat: order.latitude, lng: order.longitude },
       changeLocationModalOpen: true
     });
   };
@@ -208,23 +209,29 @@ export default class Index extends Component {
 
     const newStatusUrl = validStatuses[status];
 
-    if (
-      !newStatusUrl ||
-      !confirm(`Are you sure to change the status to ${status}?`)
-    ) {
-      return;
-    }
-
-    axios.post(newStatusUrl).then(res => {
-      this.setState({
-        orders: this.state.orders.map(order => {
-          if (order.id === orderId) {
-            return { ...order, status: res.data.status };
-          }
-          return order;
-        })
-      });
-    });
+    swal({
+      text: `Are you sure to change the status to ${status}?`,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      showCancelButton: true
+    })
+      .then(({ value }) => {
+        if (value && newStatusUrl) return Promise.resolve(value);
+        return Promise.reject();
+      })
+      .then(() => {
+        axios.post(newStatusUrl).then(res => {
+          this.setState({
+            orders: this.state.orders.map(order => {
+              if (order.id === orderId) {
+                return { ...order, status: res.data.status };
+              }
+              return order;
+            })
+          });
+        });
+      })
+      .catch(console.log);
   };
 
   render() {
@@ -338,9 +345,7 @@ export default class Index extends Component {
                         </div>
                         <button
                           className="btn btn-sm btn-warning"
-                          onClick={() =>
-                            this.showChangeLocationModalFor(order)
-                          }
+                          onClick={() => this.showChangeLocationModalFor(order)}
                         >
                           Change Location
                         </button>

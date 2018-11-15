@@ -7,7 +7,7 @@ interface ChangeLocationModalProps {
   isOpen: boolean;
   onExit: () => void;
   currentLocation?: { lat: number; lng: Number };
-  onConfirm?: (coords: { lat: number; lng: Number }) => {};
+  onConfirm?: (coords: { lat: number; lng: Number } | any) => void;
 }
 
 export default class ChangeLocationModal extends Component<
@@ -15,11 +15,20 @@ export default class ChangeLocationModal extends Component<
 > {
   static defaultProps = {
     onExit: () => {},
-    currentLocation: { lat: 36.20956640321589, lng: 44.02851596560663 }
+    currentLocation: { lat: 36.20956640321589, lng: 44.02851596560663 },
+    onConfirm: () => {}
   };
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (prevState.location) return null;
+    
+    return {
+      location: nextProps.currentLocation
+    };
+  }
+
   state = {
-    location: this.props.currentLocation
+    location: null
   };
 
   componentDidCatch(e) {
@@ -28,19 +37,16 @@ export default class ChangeLocationModal extends Component<
 
   render() {
     return (
-      <Modal
-        isOpen={this.props.isOpen}
-        size="lg"
-        toggle={this.props.onExit}
-      >
+      <Modal isOpen={this.props.isOpen} size="lg" toggle={this.props.onExit}>
         <ModalHeader>Change Location for Order</ModalHeader>
         <ModalBody>
           <div className="row">
             <div className="col-md-12">
-              <div style={{ height: "80vh" }}>
+              <div style={{ height: "70vh" }}>
                 <SelectLocationOnMap
+                  coordinates={this.state.location}
                   onLocationChanged={coords =>
-                    this.setState({ location: coords })
+                    this.setState({ location: coords }, () => console.log(this.state.location))
                   }
                 />
               </div>

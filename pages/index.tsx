@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import Layout from "../layouts/layout";
 import moment from "moment";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
 import {
   DropdownMenu,
@@ -15,10 +15,13 @@ import ChangeOrderCustomerModal from "../components/change-order-customer-modal"
 import _changeLocationModal from "../components/change-location-modal";
 
 interface AsTypeOf<T> {
-  (): T
+  (): T;
 }
 
-const ChangeLocationModal: AsTypeOf<_changeLocationModal> = dynamic(() => import("../components/change-location-modal"), {ssr: false});
+const ChangeLocationModal: AsTypeOf<_changeLocationModal> = dynamic(
+  () => import("../components/change-location-modal"),
+  { ssr: false }
+);
 
 function evaluateOrNull(func: () => any) {
   try {
@@ -40,11 +43,11 @@ export default class Index extends Component {
     changeCustomerModalOpen: false,
     changeLocationModalOpen: false,
     searchedCustomers: [],
+    selectedOrderLocation: null
   };
 
   componentDidMount() {
     this.retrieveOrdersForPage();
-
   }
 
   toggleStatusDropDown = orderId => {
@@ -128,37 +131,72 @@ export default class Index extends Component {
   };
 
   handleCustomerSearch = term => {
-    return axios.get(`/v1/customers/search?term=${term}`)
-      .then(res => {
-        this.setState({
-          searchedCustomers: res.data
-        })
+    return axios.get(`/v1/customers/search?term=${term}`).then(res => {
+      this.setState({
+        searchedCustomers: res.data
+      });
 
-        return Promise.resolve(null)
-      })
-  }
+      return Promise.resolve(null);
+    });
+  };
 
   handleCustomerSelection = newCustomer => {
-    axios.patch(`/v1/order/${this.state.selectedOrderId}/change-customer`, {id: newCustomer.id})
+    axios
+      .patch(`/v1/orders/${this.state.selectedOrderId}`, {
+        customerId: newCustomer.id
+      })
       .then(res => {
         this.setState({
           selectedOrderId: 0,
           changeCustomerModalOpen: false,
           orders: this.state.orders.map(order => {
             if (order.id === this.state.selectedOrderId) {
-              return {...order, customer: res.data}
+              return { ...order, customer: res.data };
             }
             return order;
           })
-        })
+        });
+      });
+  };
+
+  handleLocationChange = coords => {
+    console.log(coords)
+    axios
+      .patch(`/v1/orders/${this.state.selectedOrderId}`, {
+        latitude: coords.lat,
+        longitude: coords.lng
       })
+      .then(res => {
+        this.setState({
+          selectedOrderId: 0,
+          changeLocationModalOpen: false,
+          orders: this.state.orders.map(order => {
+            if (order.id === this.state.selectedOrderId) {
+              return {
+                ...order,
+                latitude: res.data.latitude,
+                longitude: res.data.longitude
+              };
+            }
+            return order;
+          })
+        });
+      });
+  };
+
+  showChangeLocationModalFor = order => {
+    this.setState({
+      selectedOrderId: order.id,
+      selectedOrderLocation: {lat: order.latitude, lng: order.longitude},
+      changeLocationModalOpen: true
+    });
   };
 
   hideChangeLocationModal = () => {
     this.setState({
       changeLocationModalOpen: false
-    })
-  }
+    });
+  };
 
   changeOrderStatusTo = orderId => (status: string) => {
     const validStatuses = {
@@ -194,7 +232,12 @@ export default class Index extends Component {
       <Layout>
         <div className="row">
           <div className="col-md-12">
-            <ChangeLocationModal onExit={this.hideChangeLocationModal} isOpen={this.state.changeLocationModalOpen}></ChangeLocationModal>
+            <ChangeLocationModal
+              onConfirm={this.handleLocationChange}
+              currentLocation={this.state.selectedOrderLocation}
+              onExit={this.hideChangeLocationModal}
+              isOpen={this.state.changeLocationModalOpen}
+            />
             <ChangeOrderCustomerModal
               options={this.state.searchedCustomers}
               onExit={this.closeChangeCustomerModal}
@@ -217,6 +260,7 @@ export default class Index extends Component {
                     <th>Customer Phone</th>
                     <th>Merchant Name</th>
                     <th>Status</th>
+                    <th>Location</th>
                     <th>Order Date</th>
                     <th>Comments</th>
                     <th>Actions</th>
@@ -244,7 +288,12 @@ export default class Index extends Component {
                           isOpen={this.state.openStatusDropdown[order.id]}
                           toggle={() => this.toggleStatusDropDown(order.id)}
                         >
-                          <DropdownToggle caret>{order.status}</DropdownToggle>
+                          <DropdownToggle
+                            caret
+                            className="btn-outline-secondary"
+                          >
+                            {order.status}
+                          </DropdownToggle>
                           <DropdownMenu>
                             <DropdownItem disabled>Change to:</DropdownItem>
                             <DropdownItem divider />
@@ -280,6 +329,21 @@ export default class Index extends Component {
                             </DropdownItem>
                           </DropdownMenu>
                         </ButtonDropdown>
+                      </td>
+                      <td>
+                        <div>
+                          <small>
+                            ({order.latitude}, {order.longitude})
+                          </small>
+                        </div>
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() =>
+                            this.showChangeLocationModalFor(order)
+                          }
+                        >
+                          Change Location
+                        </button>
                       </td>
                       <td>{this.formatDateTime(order.date)}</td>
                       <td>

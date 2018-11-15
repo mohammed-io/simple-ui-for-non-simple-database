@@ -40,7 +40,6 @@ export default class ChangeOrderCustomerModal extends Component<
 
   selectCustomer = customer => {
     this.setState({ selectedCustomer: customer })
-    console.log(customer)
   }
 
   render() {

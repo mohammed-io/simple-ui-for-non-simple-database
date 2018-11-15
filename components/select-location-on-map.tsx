@@ -5,7 +5,7 @@ export default ({
   params = { v: "3.exp", key: "" },
   width = "100%",
   height = "100%",
-  zoom = 12,
+  zoom = 15,
   loadingMessage = "Loading..",
   canChangeLocation = true,
   onLocationChanged = (coords?: { lat: number; lng: number }) => {coords},

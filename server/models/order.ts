@@ -27,6 +27,12 @@ export default class Order {
   @Column({name: 'order_date_added'})
   date: Date;
 
+  @Column({name: "order_latitude"})
+  latitude: string
+  
+  @Column({name: "order_longitude"})
+  longitude: string
+
   @ManyToOne(_ => Customer, customer => customer.orders, {eager: true})
   @JoinColumn({ name: "order_customer"})
   customer: Customer;

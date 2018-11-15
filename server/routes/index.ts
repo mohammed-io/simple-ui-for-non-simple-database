@@ -149,4 +149,18 @@ export const registerRoutes = (server: Express, _?: Server) => {
       })
     );
   });
+
+  server.patch("/v1/orders/:orderId", async (req, res) => {
+    const ordersRepository = await OrderRepository.getSingleton();
+
+    const { orderId } = req.params;
+
+    const toUpdate = await ordersRepository.findOne(orderId);
+
+    Object.assign(toUpdate, req.body);
+
+    await ordersRepository.save(toUpdate);
+
+    res.json(toUpdate);
+  });
 };
